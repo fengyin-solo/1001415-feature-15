@@ -3,6 +3,45 @@ from __future__ import annotations
 
 from typing import Any
 
+
+def _build_crack_rows() -> list[dict[str, Any]]:
+    """裂缝处置单多造一批：多个路段、多种类型与状态，便于演示按路段分组排序，
+    以及把已取消单单独垫到列表最后。
+    """
+    sections = ["城东快速路", "滨江大道", "环城北路", "南湖大道", "机场联络线", "老城支路"]
+    crack_types = ["纵向裂缝", "横向裂缝", "网状裂缝", "块状裂缝"]
+    materials = ["沥青灌缝胶", "改性乳化沥青", "聚氨酯灌缝胶"]
+    teams = ["养护一班", "养护二班", "养护三班"]
+    rows: list[dict[str, Any]] = []
+    for index in range(1, 61):
+        if index % 9 == 0:
+            status = "已取消"
+        elif index % 5 == 0:
+            status = "处置中"
+        elif index % 4 == 0:
+            status = "待安排"
+        else:
+            status = "已完成"
+        finished = status == "已完成"
+        month = 7 + index % 3
+        day = index % 28 + 1
+        rows.append({
+            "id": index,
+            "status": status,
+            "pending": status in ("待安排", "处置中"),
+            "abnormal": False,
+            "处置单号": f"CRAC-{index:04d}",
+            "所在路段": sections[index % len(sections)],
+            "裂缝类型": crack_types[index % len(crack_types)],
+            "裂缝长度": round(8 + (index * 7) % 120 + (index % 3) * 0.5, 1),
+            "灌缝材料": materials[index % len(materials)],
+            "作业班组": teams[index % len(teams)],
+            "完成日期": f"2026-{month:02d}-{day:02d}" if finished else "",
+            "处置状态": status,
+        })
+    return rows
+
+
 SEED_ROWS: dict[str, list[dict[str, Any]]] = {
     "road": [{'id': 1,
   'status': '待移交',
@@ -364,42 +403,7 @@ SEED_ROWS: dict[str, list[dict[str, Any]]] = {
   '作业班组': '坑槽修补样例3',
   '完成日期': '2026-09-03',
   '修补状态': '坑槽修补样例3'}],
-    "crack": [{'id': 1,
-  'status': '待安排',
-  'pending': True,
-  'abnormal': False,
-  '处置单号': 'CRAC-0001',
-  '所在路段': '裂缝处置样例1',
-  '裂缝类型': '裂缝处置样例1',
-  '裂缝长度': '裂缝处置样例1',
-  '灌缝材料': '裂缝处置样例1',
-  '作业班组': '裂缝处置样例1',
-  '完成日期': '2026-09-01',
-  '处置状态': '裂缝处置样例1'},
- {'id': 2,
-  'status': '处置中',
-  'pending': True,
-  'abnormal': True,
-  '处置单号': 'CRAC-0002',
-  '所在路段': '裂缝处置样例2',
-  '裂缝类型': '裂缝处置样例2',
-  '裂缝长度': '裂缝处置样例2',
-  '灌缝材料': '裂缝处置样例2',
-  '作业班组': '裂缝处置样例2',
-  '完成日期': '2026-09-02',
-  '处置状态': '裂缝处置样例2'},
- {'id': 3,
-  'status': '已完成',
-  'pending': False,
-  'abnormal': False,
-  '处置单号': 'CRAC-0003',
-  '所在路段': '裂缝处置样例3',
-  '裂缝类型': '裂缝处置样例3',
-  '裂缝长度': '裂缝处置样例3',
-  '灌缝材料': '裂缝处置样例3',
-  '作业班组': '裂缝处置样例3',
-  '完成日期': '2026-09-03',
-  '处置状态': '裂缝处置样例3'}],
+    "crack": _build_crack_rows(),
     "drain": [{'id': 1,
   'status': '待清疏',
   'pending': True,

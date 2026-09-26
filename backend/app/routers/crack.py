@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas import ActionResult, EntryPayload, PageResult
-from app.services.crack import CrackService
+from app.services.crack import SORTABLE_FIELDS, CrackService
 
 router = APIRouter(prefix="/api/crack", tags=["裂缝处置"])
 
@@ -20,14 +20,39 @@ STATUSES = ["待安排", "处置中", "已完成", "已取消"]
 def list_entries(
     keyword: str | None = Query(default=None, description="按处置单号检索"),
     status: str | None = Query(default=None, description="待安排、处置中、已完成、已取消"),
+    section: str | None = Query(default=None, description="按所在路段过滤，名称写错时给出提示"),
+    crack_type: str | None = Query(default=None, description="按裂缝类型过滤"),
+    sort: str | None = Query(
+        default=None, description=f"排序字段：{'、'.join(SORTABLE_FIELDS)}；传空值会报错"
+    ),
+    order: str = Query(default="asc", description="排序方向：asc 升序、desc 降序"),
     page: int = 1,
     size: int = 20,
 ) -> PageResult[dict]:
-    """按处置单号与状态过滤裂缝处置列表；没有数据时返回空页，不报错。"""
+    """按处置单号、状态、路段、类型过滤并排序裂缝处置列表；没有数据时返回空页，不报错。"""
     if size > 200:
         raise HTTPException(status_code=400, detail="每页最多 200 条，请缩小分页范围")
-    items, total = service.list_entries(keyword=keyword, status=status, page=page, size=size)
+    try:
+        items, total = service.list_entries(
+            keyword=keyword,
+            status=status,
+            section=section,
+            crack_type=crack_type,
+            sort=sort,
+            order=order,
+            page=page,
+            size=size,
+        )
+    except ValueError as exc:
+        # 路段写错、排序字段空着或方向不合法时，说明白是哪一头的问题。
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     return PageResult(items=items, total=total, page=page, size=size)
+
+
+@router.get("/summary")
+def crack_summary() -> dict[str, Any]:
+    """统计卡片：待安排数量、本月处置长度、取消单数，口径与列表一致。"""
+    return service.summary()
 
 
 @router.get("/{entry_id}", response_model=dict)
