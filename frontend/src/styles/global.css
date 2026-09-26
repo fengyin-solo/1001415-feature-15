@@ -26,6 +26,14 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .data-table { width: 100%; border-collapse: collapse; background: #fff; }
 .data-table th, .data-table td { border: 1px solid var(--border); padding: 8px 10px; font-size: 13px; text-align: left; }
 .empty-state { text-align: center; color: var(--muted); }
+.data-table th.sortable { cursor: pointer; user-select: none; }
+.data-table th.sorted { color: var(--brand); }
+.sort-mark { margin-left: 2px; font-size: 11px; color: var(--muted); }
+.data-table th.sorted .sort-mark { color: var(--brand); }
+.page-bar { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 12px; color: var(--muted); }
+.page-bar .btn:disabled { opacity: 0.5; cursor: default; }
+.cancelled-block { margin-top: 18px; }
+.cancelled-block h3 { margin: 0 0 8px; font-size: 14px; }
 .row-actions { display: flex; gap: 6px; }
 .btn { border: 1px solid var(--border); background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
 .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }

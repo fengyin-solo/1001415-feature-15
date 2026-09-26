@@ -21,6 +21,18 @@ class ActionResult(BaseModel):
     entry: dict[str, Any] | None = None
 
 
+class CrackPageResult(PageResult[dict]):
+    """裂缝处置列表出参：主列表之外带上单独列示的取消单，以及排序、定位上下文。"""
+
+    pages: int = 1
+    cancelled: list[dict[str, Any]] = Field(default_factory=list)
+    cancelled_total: int = 0
+    sections: list[str] = Field(default_factory=list)
+    summary: dict[str, int] = Field(default_factory=dict)
+    sort: str = "所在路段"
+    order: str = "asc"
+
+
 class EntryPayload(BaseModel):
     """登记或修改一条业务记录时提交的字段集合。"""
 
